@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { armorTypes } from '../../constants/armorTypes';
-import { calculateModifier } from '../../utils/calculations';
+import { armorTypes } from '../constants/armorTypes';
+import { calculateModifier } from '../utils/calculations';
 
 const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
   const [armorCategory, setArmorCategory] = useState('unarmored');

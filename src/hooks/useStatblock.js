@@ -10,8 +10,7 @@ export const useStatblock = () => {
   });
   const [armorClass, setArmorClass] = useState({ type: 'Natural Armor', value: 10 });
   const [hitDice, setHitDice] = useState(1);
-  const [actions, setActions] = useState([]);
-  const [newAction, setNewAction] = useState({ name: '', description: '' });
+  const [actions, setActions] = useState([{ name: '', description: '', attack: null }]);
 
   useEffect(() => {
     updateArmorClass(armorClass.type);
@@ -27,11 +26,16 @@ export const useStatblock = () => {
     setArmorClass({ type, value: type === 'Custom' ? customValue : newAC });
   };
 
-  const handleAddAction = () => {
-    if (newAction.name) {
-      setActions(prev => [...prev, newAction]);
-      setNewAction({ name: '', description: '', attack: null });
-    }
+  const addNewAction = () => {
+    setActions(prev => [...prev, { name: '', description: '', attack: null }]);
+  };
+
+  const updateAction = (index, updatedAction) => {
+    setActions(prev => prev.map((action, i) => i === index ? updatedAction : action));
+  };
+
+  const removeAction = (index) => {
+    setActions(prev => prev.filter((_, i) => i !== index));
   };
 
   const loadStatblock = (data) => {
@@ -50,9 +54,10 @@ export const useStatblock = () => {
     armorClass, setArmorClass,
     hitDice, setHitDice,
     actions, setActions,
-    newAction, setNewAction,
     updateArmorClass,
-    handleAddAction,
+    addNewAction,
+    updateAction,
+    removeAction,
     loadStatblock
   };
 };

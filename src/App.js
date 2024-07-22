@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatblockForm } from './components/StatblockForm/StatblockForm';
+import { StatblockForm } from './components/StatblockForm';
 import { StatblockPreview } from './components/StatblockPreview';
 import { useStatblock } from './hooks/useStatblock';
 import { generateStatblockText, downloadTextFile } from './utils/exportHelpers';
@@ -27,24 +27,28 @@ function App() {
   };
 
   return (
-    <div className="container mx-auto p-4 flex flex-col md:flex-row">
-      <div className="w-full md:w-1/2 pr-4">
-        <h1 className="text-2xl font-bold mb-4">Monster Masher</h1>
-        <StatblockForm statblock={statblock} />
-        <div className="flex space-x-2 mt-4">
-          <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded flex items-center">
-            <Save className="mr-2" /> Save
-          </button>
-          <button onClick={handleLoad} className="bg-yellow-500 text-white px-4 py-2 rounded">
-            Load
-          </button>
-          <button onClick={handleExport} className="bg-purple-500 text-white px-4 py-2 rounded flex items-center">
-            <Download className="mr-2" /> Export
-          </button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-4xl font-bold mb-6 text-center">Monster Masher</h1>
+      <div className="layout-container">
+        <div className="form-column">
+          <StatblockForm statblock={statblock} />
+          <div className="flex space-x-2 mt-4">
+            <button onClick={handleSave} className="btn btn-primary flex items-center">
+              <Save className="mr-2" /> Save
+            </button>
+            <button onClick={handleLoad} className="btn btn-secondary">
+              Load
+            </button>
+            <button onClick={handleExport} className="btn btn-primary flex items-center">
+              <Download className="mr-2" /> Export
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="w-full md:w-1/2 mt-4 md:mt-0">
-        <StatblockPreview statblock={statblock} />
+        <div className="preview-column">
+          <div className="sticky top-4">
+            <StatblockPreview statblock={statblock} />
+          </div>
+        </div>
       </div>
     </div>
   );

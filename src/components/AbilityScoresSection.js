@@ -1,5 +1,5 @@
 import React from 'react';
-import { calculateModifier } from '../../utils/calculations';
+import { calculateModifier } from '../utils/calculations';
 
 const AbilityScoresSection = ({ abilityScores, setAbilityScores }) => {
   const adjustAbilityScore = (ability, amount) => {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { sizeDice } from '../../constants/sizeDice';
-import { calculateModifier, calculateHP } from '../../utils/calculations';
+import { sizeDice } from '../constants/sizeDice';
+import { calculateModifier, calculateHP } from '../utils/calculations';
 
 const HitPointsSection = ({ hitDice, setHitDice, size, constitutionScore }) => {
   const adjustHitDice = (amount) => {
