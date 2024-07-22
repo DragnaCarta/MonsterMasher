@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Monster Masher",
+  "name": "The Monster Masher - D&D 5e Statblock Creator",
   "icons": [
     {
       "src": "favicon.ico",
