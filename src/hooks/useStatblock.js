@@ -13,17 +13,28 @@ export const useStatblock = () => {
   const [actions, setActions] = useState([{ name: '', description: '', attack: null }]);
 
   useEffect(() => {
-    updateArmorClass(armorClass.type);
-  }, [abilityScores.DEX, armorClass.type]);
+    updateArmorClass(armorClass.type, armorClass.value);
+  }, [abilityScores.DEX]);
 
-  const updateArmorClass = (type, customValue) => {
+  const updateArmorClass = (type, customValue = null) => {
     const armorInfo = armorTypes[type];
-    let newAC = armorInfo.base;
-    if (armorInfo.useDex) {
-      const dexMod = calculateModifier(abilityScores.DEX);
-      newAC += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
+    let newAC;
+
+    if (type === 'Natural Armor' && customValue !== null) {
+      newAC = customValue;
+    } else if (armorInfo) {
+      newAC = armorInfo.base;
+      if (armorInfo.useDex) {
+        const dexMod = calculateModifier(abilityScores.DEX);
+        newAC += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
+      }
+    } else {
+      // Default to unarmored if type is not recognized
+      newAC = 10 + calculateModifier(abilityScores.DEX);
+      type = 'Unarmored';
     }
-    setArmorClass({ type, value: type === 'Custom' ? customValue : newAC });
+
+    setArmorClass({ type, value: newAC });
   };
 
   const addNewAction = () => {

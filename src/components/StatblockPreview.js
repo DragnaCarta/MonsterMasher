@@ -1,19 +1,14 @@
 import React from 'react';
-import { calculateModifier, calculateHP, calculateCR, getHitDieSize, calculateDCR, calculateOCR, getXPFromCR, getProficiencyBonus } from '../utils/calculations';
+import { calculateModifier, calculateHP, calculateCR, getHitDieSize, formatCR, getProficiencyBonus, getXPFromCR } from '../utils/calculations';
 
 export const StatblockPreview = ({ statblock }) => {
   const { name, size, abilityScores, armorClass, hitDice, actions } = statblock;
-  const hp = calculateHP(size, hitDice, calculateModifier(abilityScores.CON));
-  const dcr = calculateDCR(hp, armorClass.value);
-  
-  // TODO: Implement proper DPR and attack bonus calculations
-  const dpr = 10; // Placeholder
-  const attackBonus = 3 + calculateModifier(abilityScores.STR); // Placeholder
-  
-  const ocr = calculateOCR(dpr, attackBonus);
-  const cr = calculateCR(hp, armorClass.value, dpr, attackBonus);
-  const xp = getXPFromCR(cr);
+  const hitDieSize = getHitDieSize(size);
+  const conModifier = calculateModifier(abilityScores.CON);
+  const hp = calculateHP(size, hitDice, conModifier);
+  const { cr, ocr, dcr } = calculateCR(hp, armorClass.value, actions, abilityScores);
   const proficiencyBonus = getProficiencyBonus(cr);
+  const xp = getXPFromCR(cr);
 
   const calculateAverageDamage = (damageDice, bonus) => {
     const [diceCount, dieType] = damageDice.split('d');
@@ -49,7 +44,7 @@ export const StatblockPreview = ({ statblock }) => {
       
       <div className="mb-4">
         <p><strong>Armor Class</strong> {armorClass.value} ({armorClass.type})</p>
-        <p><strong>Hit Points</strong> {hp} ({hitDice}d{getHitDieSize(size)} + {calculateModifier(abilityScores.CON) * hitDice})</p>
+        <p><strong>Hit Points</strong> {hp} ({hitDice}d{hitDieSize} + {conModifier * hitDice})</p>
         <p><strong>Speed</strong> 30 ft.</p>
       </div>
 
@@ -72,7 +67,7 @@ export const StatblockPreview = ({ statblock }) => {
       </div>
 
       <div className="border-t-2 border-accent pt-2">
-        <p><strong>Challenge</strong> {cr} ({xp} XP)</p>
+        <p><strong>Challenge</strong> {formatCR(cr, ocr, dcr)} ({xp} XP)</p>
         <p><strong>Proficiency Bonus</strong> +{proficiencyBonus}</p>
       </div>
     </div>
