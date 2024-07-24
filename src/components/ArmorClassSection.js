@@ -26,6 +26,14 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
     updateArmorClass(type, ac);
   };
 
+  const handleCustomACChange = (value) => {
+    const newAC = parseInt(value);
+    setCustomAC(newAC);
+    if (armorCategory === 'natural') {
+      updateArmorClass('Natural Armor', newAC);
+    }
+  };
+
   const getArmorFormula = (type) => {
     const info = armorTypes[type];
     let formula = `${info.base}`;
@@ -94,7 +102,7 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
           <input
             type="number"
             value={customAC}
-            onChange={(e) => setCustomAC(parseInt(e.target.value))}
+            onChange={(e) => handleCustomACChange(e.target.value)}
             className="w-full p-2 border rounded"
             min="1"
           />
