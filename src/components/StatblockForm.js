@@ -46,6 +46,7 @@ export const StatblockForm = ({ statblock }) => {
           updateAction={updateAction}
           addNewAction={addNewAction}
           removeAction={removeAction}
+          abilityScores={abilityScores}
         />
       </Collapsible>
     </div>

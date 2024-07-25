@@ -8,29 +8,40 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
   const [customAC, setCustomAC] = useState(10);
 
   useEffect(() => {
-    if (armorCategory === 'unarmored') {
-      updateArmorClass('Unarmored', 10 + calculateModifier(dexterity));
-    } else if (armorCategory === 'natural') {
-      updateArmorClass('Natural Armor', customAC);
+    calculateAndUpdateAC(armorClass.type);
+  }, [dexterity, armorClass.type]);
+
+  const calculateAndUpdateAC = (type, customValue = null) => {
+    const armorInfo = armorTypes[type];
+    let newAC;
+
+    if (type === 'Natural Armor' && customValue !== null) {
+      newAC = customValue;
+    } else if (armorInfo) {
+      newAC = armorInfo.base;
+      if (armorInfo.useDex) {
+        const dexMod = calculateModifier(dexterity);
+        newAC += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
+      }
+    } else {
+      // Default to unarmored if type is not recognized
+      newAC = 10 + calculateModifier(dexterity);
+      type = 'Unarmored';
     }
-  }, [armorCategory, customAC, dexterity, updateArmorClass]);
+
+    updateArmorClass(type, newAC);
+  };
 
   const handleArmorTypeChange = (type) => {
     setSelectedArmorType(type);
-    const armorInfo = armorTypes[type];
-    let ac = armorInfo.base;
-    if (armorInfo.useDex) {
-      const dexMod = calculateModifier(dexterity);
-      ac += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
-    }
-    updateArmorClass(type, ac);
+    calculateAndUpdateAC(type);
   };
 
   const handleCustomACChange = (value) => {
     const newAC = parseInt(value);
     setCustomAC(newAC);
     if (armorCategory === 'natural') {
-      updateArmorClass('Natural Armor', newAC);
+      calculateAndUpdateAC('Natural Armor', newAC);
     }
   };
 
@@ -108,6 +119,9 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
           />
         </div>
       )}
+      <div className="mt-2">
+        <strong>Current AC:</strong> {armorClass.value} ({armorClass.type})
+      </div>
     </div>
   );
 };

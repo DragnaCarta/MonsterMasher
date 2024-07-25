@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { validateAction } from '../utils/actionHelpers';
 import AttackInputFields from './AttackInputFields';
+import SavingThrowInputFields from './SavingThrowInputFields';
 
-export const ActionInput = ({ action, updateAction, removeAction }) => {
+export const ActionInput = ({ action, updateAction, removeAction, abilityScores = {}, proficiencyBonus = 2 }) => {
   const [errors, setErrors] = useState([]);
 
   const handleChange = (e) => {
@@ -21,26 +22,24 @@ export const ActionInput = ({ action, updateAction, removeAction }) => {
     });
   };
 
-  const adjustDamageDice = (amount) => {
-    const currentDice = parseInt(action.attack?.damageDice?.split('d')[0] || '0');
-    const newDice = Math.max(1, currentDice + amount);
-    const diceType = action.attack?.damageDice?.split('d')[1] || '6';
+  const handleSavingThrowChange = (e) => {
+    const { name, value } = e.target;
     updateAction({
       ...action,
-      attack: {
-        ...action.attack,
-        damageDice: `${newDice}d${diceType}`
+      savingThrow: {
+        ...action.savingThrow,
+        ...value
       }
     });
   };
 
-  const toggleAttack = () => {
-    if (action.attack) {
-      updateAction({ ...action, attack: null });
+  const toggleActionType = (type) => {
+    if (action[type]) {
+      updateAction({ ...action, [type]: null });
     } else {
-      updateAction({
-        ...action,
-        attack: {
+      const newAction = { ...action };
+      if (type === 'attack') {
+        newAction.attack = {
           type: 'melee',
           range: '5 ft.',
           targets: '1',
@@ -48,8 +47,24 @@ export const ActionInput = ({ action, updateAction, removeAction }) => {
           damageDice: '1d6',
           damageType: 'slashing',
           addAbilityToDamage: true
-        }
-      });
+        };
+        newAction.savingThrow = null;
+      } else if (type === 'savingThrow') {
+        const defaultAbilityScore = 'DEX';
+        const defaultAbilityValue = abilityScores[defaultAbilityScore] || 10;
+        newAction.savingThrow = {
+          abilityScore: defaultAbilityScore,
+          saveDC: 8 + proficiencyBonus + Math.floor((defaultAbilityValue - 10) / 2),
+          type: 'targeted',
+          targets: 1,
+          range: '60 ft',
+          damageDice: '8d6',
+          damageType: 'fire',
+          halfDamageOnSave: true
+        };
+        newAction.attack = null;
+      }
+      updateAction(newAction);
     }
   };
 
@@ -73,21 +88,37 @@ export const ActionInput = ({ action, updateAction, removeAction }) => {
         className="w-full p-2 border rounded mb-2"
       />
       <div className="mb-2">
-        <label className="flex items-center">
+        <label className="flex items-center mr-4 inline-block">
           <input
             type="checkbox"
             checked={!!action.attack}
-            onChange={toggleAttack}
+            onChange={() => toggleActionType('attack')}
             className="mr-2"
           />
           Attack
+        </label>
+        <label className="flex items-center inline-block">
+          <input
+            type="checkbox"
+            checked={!!action.savingThrow}
+            onChange={() => toggleActionType('savingThrow')}
+            className="mr-2"
+          />
+          Saving Throw
         </label>
       </div>
       {action.attack && (
         <AttackInputFields
           attack={action.attack}
           handleAttackChange={handleAttackChange}
-          adjustDamageDice={adjustDamageDice}
+        />
+      )}
+      {action.savingThrow && (
+        <SavingThrowInputFields
+          savingThrow={action.savingThrow}
+          handleSavingThrowChange={handleSavingThrowChange}
+          abilityScores={abilityScores}
+          proficiencyBonus={proficiencyBonus}
         />
       )}
       <textarea
@@ -115,3 +146,5 @@ export const ActionInput = ({ action, updateAction, removeAction }) => {
     </div>
   );
 };
+
+export default ActionInput;
