@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-import { armorTypes } from '../constants/armorTypes';
-import { calculateModifier } from '../utils/calculations';
+import { useState } from 'react';
 
 export const useStatblock = () => {
   const [name, setName] = useState('');
@@ -10,35 +8,32 @@ export const useStatblock = () => {
   });
   const [armorClass, setArmorClass] = useState({ type: 'Natural Armor', value: 10 });
   const [hitDice, setHitDice] = useState(1);
-  const [actions, setActions] = useState([{ name: '', description: '', attack: null }]);
+  const [actions, setActions] = useState([{ 
+    name: '', 
+    description: '', 
+    attack: null, 
+    savingThrow: null 
+  }]);
 
-  useEffect(() => {
-    updateArmorClass(armorClass.type, armorClass.value);
-  }, [abilityScores.DEX]);
-
-  const updateArmorClass = (type, customValue = null) => {
-    const armorInfo = armorTypes[type];
-    let newAC;
-
-    if (type === 'Natural Armor' && customValue !== null) {
-      newAC = customValue;
-    } else if (armorInfo) {
-      newAC = armorInfo.base;
-      if (armorInfo.useDex) {
-        const dexMod = calculateModifier(abilityScores.DEX);
-        newAC += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
-      }
-    } else {
-      // Default to unarmored if type is not recognized
-      newAC = 10 + calculateModifier(abilityScores.DEX);
-      type = 'Unarmored';
-    }
-
-    setArmorClass({ type, value: newAC });
+  const updateArmorClass = (type, value) => {
+    setArmorClass({ type, value });
   };
 
   const addNewAction = () => {
-    setActions(prev => [...prev, { name: '', description: '', attack: null }]);
+    setActions(prev => [...prev, { 
+      name: '', 
+      description: '', 
+      attack: null, 
+      savingThrow: {
+        abilityScore: 'DEX',
+        type: 'targeted',
+        targets: 1,
+        range: 60,
+        damageDice: '8d6',
+        damageType: 'fire',
+        halfDamageOnSave: true
+      }
+    }]);
   };
 
   const updateAction = (index, updatedAction) => {
@@ -55,19 +50,22 @@ export const useStatblock = () => {
     setAbilityScores(data.abilityScores);
     setArmorClass(data.armorClass);
     setHitDice(data.hitDice);
-    setActions(data.actions);
+    setActions(data.actions.map(action => ({
+      ...action,
+      attack: action.attack || null,
+      savingThrow: action.savingThrow || null
+    })));
   };
 
   return {
     name, setName,
     size, setSize,
     abilityScores, setAbilityScores,
-    armorClass, setArmorClass,
+    armorClass, updateArmorClass,
     hitDice, setHitDice,
     actions, setActions,
-    updateArmorClass,
-    addNewAction,
     updateAction,
+    addNewAction,
     removeAction,
     loadStatblock
   };

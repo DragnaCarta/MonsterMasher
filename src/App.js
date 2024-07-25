@@ -29,8 +29,8 @@ function App() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-4xl font-bold mb-6 text-center">Monster Masher</h1>
-      <div className="layout-container">
-        <div className="form-column">
+      <div className="flex flex-col lg:flex-row">
+        <div className="w-full lg:w-3/5 lg:pr-4 mb-4 lg:mb-0">
           <StatblockForm statblock={statblock} />
           <div className="flex space-x-2 mt-4">
             <button onClick={handleSave} className="btn btn-primary flex items-center">
@@ -44,8 +44,8 @@ function App() {
             </button>
           </div>
         </div>
-        <div className="preview-column">
-          <div className="sticky top-4">
+        <div className="w-full lg:w-2/5 lg:pl-4">
+          <div className="lg:sticky lg:top-4">
             <StatblockPreview statblock={statblock} />
           </div>
         </div>
