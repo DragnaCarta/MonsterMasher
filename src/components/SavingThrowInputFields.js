@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { damageTypes, diceTypes } from '../utils/actionHelpers';
+import { calculateSaveDC } from '../utils/calculations';
 
-const SavingThrowInputFields = ({ savingThrow, handleSavingThrowChange, abilityScores = {}, proficiencyBonus = 2 }) => {
+const SavingThrowInputFields = ({
+  savingThrow,
+  handleSavingThrowChange,
+  abilityScores = {},
+  proficiencyBonus = 2,
+}) => {
   const safeSavingThrow = savingThrow || {};
 
-  const calculateSaveDC = (abilityScore) => {
-    const abilityModifier = Math.floor(((abilityScores[abilityScore] || 10) - 10) / 2);
-    return 8 + proficiencyBonus + abilityModifier;
-  };
+  const saveDC = useMemo(() => {
+    return calculateSaveDC(savingThrow, proficiencyBonus, abilityScores);
+  }, [savingThrow, abilityScores, proficiencyBonus]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,215 +27,220 @@ const SavingThrowInputFields = ({ savingThrow, handleSavingThrowChange, abilityS
         aoeSize: 20,
         aoeOrigin: 'self',
       };
-      // Simulate selecting the default AoE type to set up all necessary fields
-      handleAoETypeChange({ target: { value: 'sphere' } }, updatedSavingThrow);
     }
 
     handleSavingThrowChange({
       target: {
         name: 'savingThrow',
-        value: updatedSavingThrow
-      }
+        value: updatedSavingThrow,
+      },
     });
   };
 
-  const handleAoETypeChange = (e, currentSavingThrow = safeSavingThrow) => {
-    const { value } = e.target;
-    const newSavingThrow = {
-      ...currentSavingThrow,
-      aoeType: value,
-      aoeSize: value === 'cone' ? 30 : value === 'sphere' ? 20 : 15,
-    };
-
-    if (value === 'cone' || value === 'line') {
-      newSavingThrow.aoeOrigin = 'self';
-      delete newSavingThrow.range;
-    } else if (newSavingThrow.aoeOrigin === 'self') {
-      newSavingThrow.range = 60;
-    }
-
-    handleSavingThrowChange({
-      target: {
-        name: 'savingThrow',
-        value: newSavingThrow
-      }
-    });
+  const averageDamage = () => {
+    const [diceCount, diceType] = (safeSavingThrow.damageDice || '8d6').split(
+      'd'
+    );
+    return Math.floor((parseInt(diceCount) * (parseInt(diceType) + 1)) / 2);
   };
-
-  const isRangeVisible = safeSavingThrow.type === 'targeted' || 
-    (safeSavingThrow.type === 'aoe' && !['cone', 'line'].includes(safeSavingThrow.aoeType));
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <div>
-        <label className="block mb-1">Ability Score</label>
-        <select
-          name="abilityScore"
-          value={safeSavingThrow.abilityScore || 'DEX'}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded text-base"
-        >
-          {['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].map(ability => (
-            <option key={ability} value={ability}>{ability}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="block mb-1">Save DC</label>
-        <input
-          type="number"
-          name="saveDC"
-          value={safeSavingThrow.saveDC || calculateSaveDC(safeSavingThrow.abilityScore || 'DEX')}
-          readOnly
-          className="w-full p-2 border rounded text-base bg-gray-100"
-        />
-      </div>
-      <div>
-        <label className="block mb-1">Type</label>
-        <select
-          name="type"
-          value={safeSavingThrow.type || 'targeted'}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded text-base"
-        >
-          <option value="targeted">Targeted</option>
-          <option value="aoe">Area of Effect</option>
-        </select>
-      </div>
+    <div className="flex flex-wrap items-center gap-2">
+      <select
+        name="type"
+        value={safeSavingThrow.type || 'targeted'}
+        onChange={handleInputChange}
+        className="select"
+      >
+        <option value="targeted">Targeted</option>
+        <option value="aoe">Area of Effect</option>
+      </select>
+
       {safeSavingThrow.type === 'targeted' ? (
-        <div>
-          <label className="block mb-1">Number of Targets</label>
+        <>
           <input
             type="number"
             name="targets"
             value={safeSavingThrow.targets || 1}
             onChange={handleInputChange}
             min="1"
-            className="w-full p-2 border rounded text-base"
-          />
-        </div>
-      ) : (
-        <>
-          <div>
-            <label className="block mb-1">Area of Effect</label>
-            <select
-              name="aoeType"
-              value={safeSavingThrow.aoeType || 'sphere'}
-              onChange={handleAoETypeChange}
-              className="w-full p-2 border rounded text-base"
-            >
-              <option value="sphere">Sphere</option>
-              <option value="cube">Cube</option>
-              <option value="cone">Cone</option>
-              <option value="cylinder">Cylinder</option>
-              <option value="line">Line</option>
-            </select>
-          </div>
-          <div>
-            <label className="block mb-1">Area Size</label>
-            <div className="flex items-center">
-              <input
-                type="number"
-                name="aoeSize"
-                value={safeSavingThrow.aoeSize || 20}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded-l text-base"
-                min="1"
-              />
-              <span className="bg-gray-200 p-2 rounded-r border border-l-0">ft.</span>
-            </div>
-          </div>
-          {!['cone', 'line'].includes(safeSavingThrow.aoeType) && (
-            <div>
-              <label className="block mb-1">Origin</label>
-              <select
-                name="aoeOrigin"
-                value={safeSavingThrow.aoeOrigin || 'self'}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded text-base"
-              >
-                <option value="self">Self</option>
-                <option value="point">Point</option>
-              </select>
-            </div>
-          )}
-        </>
-      )}
-      {isRangeVisible && (
-        <div>
-          <label className="block mb-1">Range</label>
-          <div className="flex items-center">
-            <input
-              type="number"
-              name="range"
-              value={safeSavingThrow.range || 60}
-              onChange={handleInputChange}
-              className="w-full p-2 border rounded-l text-base"
-              min="0"
-            />
-            <span className="bg-gray-200 p-2 rounded-r border border-l-0">ft.</span>
-          </div>
-        </div>
-      )}
-      <div className="sm:col-span-2">
-        <label className="block mb-1">Damage Dice</label>
-        <div className="flex items-center space-x-2">
-          <input
-            type="number"
-            name="damageDiceCount"
-            value={parseInt((safeSavingThrow.damageDice || '8d6').split('d')[0])}
-            onChange={(e) => handleInputChange({
-              target: {
-                name: 'damageDice',
-                value: `${e.target.value}d${(safeSavingThrow.damageDice || '8d6').split('d')[1]}`
-              }
-            })}
-            className="w-20 p-2 border rounded text-base text-center"
-            min="1"
+            className="input w-16 text-center"
           />
           <select
-            name="damageDiceType"
-            value={(safeSavingThrow.damageDice || '8d6').split('d')[1]}
-            onChange={(e) => handleInputChange({
-              target: {
-                name: 'damageDice',
-                value: `${(safeSavingThrow.damageDice || '8d6').split('d')[0]}d${e.target.value}`
-              }
-            })}
-            className="p-2 border rounded text-base"
-          >
-            {diceTypes.map(type => (
-              <option key={type} value={type.slice(1)}>{type}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="block mb-1">Damage Type</label>
-        <select
-          name="damageType"
-          value={safeSavingThrow.damageType || ''}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded text-base"
-        >
-          <option value="">Select damage type</option>
-          {damageTypes.map(type => (
-            <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="flex items-center text-base">
-          <input
-            type="checkbox"
-            name="halfDamageOnSave"
-            checked={safeSavingThrow.halfDamageOnSave || false}
+            name="targetType"
+            value={safeSavingThrow.targetType || 'creatures'}
             onChange={handleInputChange}
-            className="mr-2 w-5 h-5"
+            className="select"
+          >
+            <option value="creatures">creatures</option>
+            <option value="objects">objects</option>
+            <option value="targets">targets</option>
+          </select>
+          <span>within</span>
+          <input
+            type="number"
+            name="range"
+            value={safeSavingThrow.range || 60}
+            onChange={handleInputChange}
+            className="input w-16 text-center"
+            min="0"
           />
-          Half damage on successful save
-        </label>
-      </div>
+          <span>ft. must make a</span>
+        </>
+      ) : (
+        <>
+          <span>Each creature in a</span>
+          <input
+            type="number"
+            name="aoeSize"
+            value={safeSavingThrow.aoeSize || 20}
+            onChange={handleInputChange}
+            className="input w-16 text-center"
+            min="1"
+          />
+          <span>-foot</span>
+          <select
+            name="aoeType"
+            value={safeSavingThrow.aoeType || 'sphere'}
+            onChange={handleInputChange}
+            className="select"
+          >
+            <option value="sphere">sphere</option>
+            <option value="cube">cube</option>
+            <option value="cone">cone</option>
+            <option value="cylinder">cylinder</option>
+            <option value="line">line</option>
+          </select>
+          <span>originating from</span>
+          <select
+            name="aoeOrigin"
+            value={safeSavingThrow.aoeOrigin || 'self'}
+            onChange={handleInputChange}
+            className="select"
+          >
+            <option value="self">self</option>
+            <option value="point">a point</option>
+          </select>
+          {safeSavingThrow.aoeOrigin === 'point' && (
+            <>
+              <span>within</span>
+              <input
+                type="number"
+                name="range"
+                value={safeSavingThrow.range || 60}
+                onChange={handleInputChange}
+                className="input w-16 text-center"
+                min="0"
+              />
+              <span>feet</span>
+            </>
+          )}
+          <span>must make a</span>
+        </>
+      )}
+
+      <span>DC {saveDC}</span>
+      <select
+        name="abilityScore"
+        value={safeSavingThrow.abilityScore || 'DEX'}
+        onChange={handleInputChange}
+        className="select"
+      >
+        {['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].map((ability) => (
+          <option key={ability} value={ability}>
+            {ability}
+          </option>
+        ))}
+      </select>
+      <span>saving throw</span>
+      <span>(based on this creature's</span>
+      <select
+        name="monsterAbilityScore"
+        value={
+          safeSavingThrow.monsterAbilityScore ||
+          safeSavingThrow.abilityScore ||
+          'DEX'
+        }
+        onChange={handleInputChange}
+        className="select"
+      >
+        {['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].map((ability) => (
+          <option key={ability} value={ability}>
+            {ability}
+          </option>
+        ))}
+      </select>
+      <span>). A target takes</span>
+      <span>{averageDamage()}</span>
+      <span>(</span>
+      <input
+        type="number"
+        name="damageDiceCount"
+        value={parseInt((safeSavingThrow.damageDice || '8d6').split('d')[0])}
+        onChange={(e) =>
+          handleInputChange({
+            target: {
+              name: 'damageDice',
+              value: `${e.target.value}d${
+                (safeSavingThrow.damageDice || '8d6').split('d')[1]
+              }`,
+            },
+          })
+        }
+        className="input w-16 text-center"
+        min="1"
+      />
+      <select
+        name="damageDiceType"
+        value={(safeSavingThrow.damageDice || '8d6').split('d')[1]}
+        onChange={(e) =>
+          handleInputChange({
+            target: {
+              name: 'damageDice',
+              value: `${(safeSavingThrow.damageDice || '8d6').split('d')[0]}d${
+                e.target.value
+              }`,
+            },
+          })
+        }
+        className="select"
+      >
+        {diceTypes.map((type) => (
+          <option key={type} value={type.slice(1)}>
+            {type}
+          </option>
+        ))}
+      </select>
+      <span>)</span>
+      <select
+        name="damageType"
+        value={safeSavingThrow.damageType || ''}
+        onChange={handleInputChange}
+        className="select"
+      >
+        <option value="">Select damage type</option>
+        {damageTypes.map((type) => (
+          <option key={type} value={type}>
+            {type}
+          </option> // Changed this line
+        ))}
+      </select>
+      <span>damage on a failed save </span>
+      <span>(</span>
+      <select
+        name="damageOnSuccess"
+        value={safeSavingThrow.damageOnSuccess || 'none'}
+        onChange={handleInputChange}
+        className="select"
+      >
+        <option value="none">no damage on success</option>
+        <option value="half">half damage on success</option>
+      </select>
+      <span>)</span>
+      {safeSavingThrow.damageOnSuccess === 'half' && (
+        <span>, or half as much damage on a successful one</span>
+      )}
+      <span>.</span>
     </div>
   );
 };
