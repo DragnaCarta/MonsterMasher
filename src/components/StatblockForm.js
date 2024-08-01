@@ -2,41 +2,68 @@ import React from 'react';
 import Collapsible from './Collapsible';
 import BasicInfoSection from './BasicInfoSection';
 import AbilityScoresSection from './AbilityScoresSection';
-import ArmorClassSection from './ArmorClassSection';
-import HitPointsSection from './HitPointsSection';
+import CombatStatsSection from './CombatStatsSection';
 import ActionsSection from './ActionsSection';
+import BonusActionsSection from './BonusActionsSection';
+import ReactionsSection from './ReactionsSection';
 
 export const StatblockForm = ({ statblock }) => {
   const {
-    name, setName,
-    size, setSize,
-    abilityScores, setAbilityScores,
-    armorClass, updateArmorClass,
-    hitDice, setHitDice,
-    actions, updateAction, addNewAction, removeAction
+    name,
+    setName,
+    size,
+    setSize,
+    abilityScores,
+    setAbilityScores,
+    armorClass,
+    updateArmorClass,
+    proficiencyBonus,
+    hitDice,
+    setHitDice,
+    speed,
+    setSpeed,
+    actions,
+    updateAction,
+    addNewAction,
+    removeAction,
+    bonusActions,
+    updateBonusAction,
+    addNewBonusAction,
+    removeBonusAction,
+    reactions,
+    updateReaction,
+    addNewReaction,
+    removeReaction,
   } = statblock;
 
   return (
     <div className="space-y-6">
       <Collapsible title="Basic Information">
-        <BasicInfoSection name={name} setName={setName} size={size} setSize={setSize} />
+        <BasicInfoSection
+          name={name}
+          setName={setName}
+          size={size}
+          setSize={setSize}
+        />
       </Collapsible>
 
       <Collapsible title="Ability Scores">
-        <AbilityScoresSection abilityScores={abilityScores} setAbilityScores={setAbilityScores} />
+        <AbilityScoresSection
+          abilityScores={abilityScores}
+          setAbilityScores={setAbilityScores}
+        />
       </Collapsible>
 
       <Collapsible title="Combat Statistics">
-        <ArmorClassSection 
-          armorClass={armorClass} 
+        <CombatStatsSection
+          armorClass={armorClass}
           updateArmorClass={updateArmorClass}
-          dexterity={abilityScores.DEX}
-        />
-        <HitPointsSection
           hitDice={hitDice}
           setHitDice={setHitDice}
           size={size}
-          constitutionScore={abilityScores.CON}
+          abilityScores={abilityScores}
+          speed={speed}
+          setSpeed={setSpeed}
         />
       </Collapsible>
 
@@ -47,6 +74,29 @@ export const StatblockForm = ({ statblock }) => {
           addNewAction={addNewAction}
           removeAction={removeAction}
           abilityScores={abilityScores}
+          proficiencyBonus={proficiencyBonus}
+        />
+      </Collapsible>
+
+      <Collapsible title="Bonus Actions">
+        <BonusActionsSection
+          bonusActions={bonusActions}
+          updateBonusAction={updateBonusAction}
+          addNewBonusAction={addNewBonusAction}
+          removeBonusAction={removeBonusAction}
+          abilityScores={abilityScores}
+          proficiencyBonus={proficiencyBonus}
+        />
+      </Collapsible>
+
+      <Collapsible title="Reactions">
+        <ReactionsSection
+          reactions={reactions}
+          updateReaction={updateReaction}
+          addNewReaction={addNewReaction}
+          removeReaction={removeReaction}
+          abilityScores={abilityScores}
+          proficiencyBonus={proficiencyBonus}
         />
       </Collapsible>
     </div>

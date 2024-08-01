@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { validateAction } from '../utils/actionHelpers';
+import React from 'react';
+import { damageTypes, diceTypes } from '../utils/actionHelpers';
+import { calculateModifier, calculateAverageDamage } from '../utils/calculations';
 import AttackInputFields from './AttackInputFields';
 import SavingThrowInputFields from './SavingThrowInputFields';
 
-export const ActionInput = ({ action, updateAction, removeAction, abilityScores = {}, proficiencyBonus = 2 }) => {
-  const [errors, setErrors] = useState([]);
-
+const ActionInput = ({ action, updateAction, removeAction, abilityScores = {}, proficiencyBonus = 2 }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     updateAction({ ...action, [name]: value });
@@ -33,84 +32,77 @@ export const ActionInput = ({ action, updateAction, removeAction, abilityScores 
     });
   };
 
-  const toggleActionType = (type) => {
-    if (action[type]) {
-      updateAction({ ...action, [type]: null });
+  const handleActionTypeChange = (e) => {
+    const actionType = e.target.value;
+    let updatedAction = { ...action };
+
+    if (actionType === 'attack') {
+      updatedAction.attack = {
+        type: 'melee',
+        range: '5 ft.',
+        targets: '1',
+        abilityScore: 'STR',
+        damageDice: '1d6',
+        damageType: 'slashing',
+        addAbilityToDamage: true
+      };
+      updatedAction.savingThrow = null;
+    } else if (actionType === 'savingThrow') {
+      const defaultAbilityScore = 'DEX';
+      const defaultAbilityValue = abilityScores[defaultAbilityScore] || 10;
+      updatedAction.savingThrow = {
+        abilityScore: defaultAbilityScore,
+        saveDC: 8 + proficiencyBonus + Math.floor((defaultAbilityValue - 10) / 2),
+        type: 'targeted',
+        targets: 1,
+        range: '60 ft',
+        damageDice: '8d6',
+        damageType: 'fire',
+        halfDamageOnSave: true
+      };
+      updatedAction.attack = null;
     } else {
-      const newAction = { ...action };
-      if (type === 'attack') {
-        newAction.attack = {
-          type: 'melee',
-          range: '5 ft.',
-          targets: '1',
-          abilityScore: 'STR',
-          damageDice: '1d6',
-          damageType: 'slashing',
-          addAbilityToDamage: true
-        };
-        newAction.savingThrow = null;
-      } else if (type === 'savingThrow') {
-        const defaultAbilityScore = 'DEX';
-        const defaultAbilityValue = abilityScores[defaultAbilityScore] || 10;
-        newAction.savingThrow = {
-          abilityScore: defaultAbilityScore,
-          saveDC: 8 + proficiencyBonus + Math.floor((defaultAbilityValue - 10) / 2),
-          type: 'targeted',
-          targets: 1,
-          range: '60 ft',
-          damageDice: '8d6',
-          damageType: 'fire',
-          halfDamageOnSave: true
-        };
-        newAction.attack = null;
-      }
-      updateAction(newAction);
+      updatedAction.attack = null;
+      updatedAction.savingThrow = null;
     }
+
+    updateAction(updatedAction);
   };
 
-  const handleSubmit = () => {
-    const validationErrors = validateAction(action);
-    if (validationErrors.length === 0) {
-      setErrors([]);
-    } else {
-      setErrors(validationErrors);
-    }
+  const getActionType = () => {
+    if (action.attack) return 'attack';
+    if (action.savingThrow) return 'savingThrow';
+    return 'custom';
   };
 
   return (
     <div className="mb-4 p-4 border rounded">
-      <input
-        type="text"
-        name="name"
-        value={action.name}
-        onChange={handleChange}
-        placeholder="Action Name"
-        className="w-full p-2 border rounded mb-2"
-      />
-      <div className="mb-2">
-        <label className="flex items-center mr-4 inline-block">
-          <input
-            type="checkbox"
-            checked={!!action.attack}
-            onChange={() => toggleActionType('attack')}
-            className="mr-2"
-          />
-          Attack
-        </label>
-        <label className="flex items-center inline-block">
-          <input
-            type="checkbox"
-            checked={!!action.savingThrow}
-            onChange={() => toggleActionType('savingThrow')}
-            className="mr-2"
-          />
-          Saving Throw
-        </label>
+      <div className="flex mb-2">
+        <input
+          type="text"
+          name="name"
+          value={action.name}
+          onChange={handleChange}
+          placeholder="Action Name"
+          className="flex-grow p-2 border rounded mr-2"
+        />
+        <select
+          value={getActionType()}
+          onChange={handleActionTypeChange}
+          className="p-2 border rounded"
+        >
+          <option value="custom">Custom</option>
+          <option value="attack">Attack</option>
+          <option value="savingThrow">Saving Throw</option>
+        </select>
       </div>
+      
       {action.attack && (
         <AttackInputFields
           attack={action.attack}
           handleAttackChange={handleAttackChange}
+          abilityScores={abilityScores}
+          proficiencyBonus={proficiencyBonus}
         />
       )}
       {action.savingThrow && (
@@ -128,21 +120,9 @@ export const ActionInput = ({ action, updateAction, removeAction, abilityScores 
         placeholder="Action Description"
         className="w-full p-2 border rounded mb-2"
       />
-      <div className="flex justify-between">
-        <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2 rounded">
-          Validate Action
-        </button>
-        <button onClick={removeAction} className="bg-red-500 text-white px-4 py-2 rounded">
-          Remove Action
-        </button>
-      </div>
-      {errors.length > 0 && (
-        <div className="mt-2 text-red-500">
-          {errors.map((error, index) => (
-            <p key={index}>{error}</p>
-          ))}
-        </div>
-      )}
+      <button onClick={removeAction} className="bg-red-500 text-white px-4 py-2 rounded">
+        Remove Action
+      </button>
     </div>
   );
 };
