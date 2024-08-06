@@ -52,7 +52,11 @@ export const useStatblock = () => {
   ]);
 
   const updateArmorClass = (type, value) => {
-    setArmorClass({ type, value });
+    if (type === 'Natural Armor') {
+      setArmorClass({ type, value: parseInt(value) || 10 });
+    } else {
+      setArmorClass({ type, value });
+    }
   };
 
   const addNewAction = () => {

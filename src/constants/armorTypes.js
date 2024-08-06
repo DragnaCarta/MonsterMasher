@@ -22,6 +22,6 @@ export const armorTypes = {
   'Barkskin': { base: 16, useDex: false, isSpell: true },
 
   // Other
-  'Natural Armor': { base: 10, useDex: true, isNatural: true },
+  'Natural Armor': { isNatural: true, useDex: false },
   'Unarmored': { base: 10, useDex: true },
 };
