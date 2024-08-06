@@ -5,6 +5,7 @@ import { calculateModifier } from '../utils/calculations';
 const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
   const [armorCategory, setArmorCategory] = useState('unarmored');
   const [selectedArmorType, setSelectedArmorType] = useState('');
+  const [manualAC, setManualAC] = useState(armorClass.value);
 
   useEffect(() => {
     calculateAndUpdateAC(armorClass.type);
@@ -15,13 +16,16 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
     let newAC;
 
     if (armorInfo) {
-      newAC = armorInfo.base;
-      if (armorInfo.useDex) {
-        const dexMod = calculateModifier(dexterity);
-        newAC += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
+      if (type === 'Natural Armor' && armorCategory === 'natural') {
+        newAC = manualAC;
+      } else {
+        newAC = armorInfo.base;
+        if (armorInfo.useDex) {
+          const dexMod = calculateModifier(dexterity);
+          newAC += armorInfo.maxDex ? Math.min(dexMod, armorInfo.maxDex) : dexMod;
+        }
       }
     } else {
-      // Default to unarmored if type is not recognized
       newAC = 10 + calculateModifier(dexterity);
       type = 'Unarmored';
     }
@@ -34,13 +38,30 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
     calculateAndUpdateAC(type);
   };
 
+  const handleArmorCategoryChange = (category) => {
+    setArmorCategory(category);
+    if (category === 'natural') {
+      setSelectedArmorType('Natural Armor');
+      calculateAndUpdateAC('Natural Armor');
+    } else {
+      setSelectedArmorType('');
+      calculateAndUpdateAC('');
+    }
+  };
+
+  const handleManualACChange = (e) => {
+    const newAC = parseInt(e.target.value) || 10;
+    setManualAC(newAC);
+    updateArmorClass('Natural Armor', newAC);
+  };
+
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex flex-wrap items-center space-x-2">
       <span className="font-bold">Armor Class</span>
       <span>{armorClass.value}</span>
       <select
         value={armorCategory}
-        onChange={(e) => setArmorCategory(e.target.value)}
+        onChange={(e) => handleArmorCategoryChange(e.target.value)}
         className="select"
       >
         <option value="unarmored">Unarmored</option>
@@ -54,10 +75,19 @@ const ArmorClassSection = ({ armorClass, updateArmorClass, dexterity }) => {
           className="select"
         >
           <option value="">Select Armor Type</option>
-          {Object.keys(armorTypes).map(type => (
+          {Object.keys(armorTypes).filter(type => type !== 'Natural Armor').map(type => (
             <option key={type} value={type}>{type}</option>
           ))}
         </select>
+      )}
+      {armorCategory === 'natural' && (
+        <input
+          type="number"
+          value={manualAC}
+          onChange={handleManualACChange}
+          className="input w-16 text-center"
+          min="1"
+        />
       )}
     </div>
   );
