@@ -12,6 +12,8 @@ export const StatblockPreview = ({ statblock }) => {
   const {
     name,
     size,
+    type,
+    alignment,
     abilityScores,
     armorClass,
     hitDice,
@@ -110,7 +112,7 @@ export const StatblockPreview = ({ statblock }) => {
     <div className="statblock-preview font-serif">
       <div className="border-b-2 border-accent pb-2 mb-4">
         <h2 className="text-3xl font-bold">{name}</h2>
-        <p className="italic">{size} creature</p>
+        <p className="italic">{size} {type}, {alignment}</p>
       </div>
 
       <div className="mb-4">

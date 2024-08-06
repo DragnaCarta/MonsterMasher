@@ -9,6 +9,8 @@ import {
 export const useStatblock = () => {
   const [name, setName] = useState('');
   const [size, setSize] = useState('Medium');
+  const [type, setType] = useState(''); // New state for creature type
+  const [alignment, setAlignment] = useState(''); // New state for alignment
   const [abilityScores, setAbilityScores] = useState({
     STR: 10,
     DEX: 10,
@@ -123,6 +125,8 @@ export const useStatblock = () => {
   const loadStatblock = (data) => {
     setName(data.name);
     setSize(data.size);
+    setType(data.type); // Load type
+    setAlignment(data.alignment); // Load alignment
     setAbilityScores(data.abilityScores);
     setArmorClass(data.armorClass);
     setHitDice(data.hitDice);
@@ -165,6 +169,10 @@ export const useStatblock = () => {
     setName,
     size,
     setSize,
+    type, 
+    setType, 
+    alignment, 
+    setAlignment,
     abilityScores,
     setAbilityScores,
     armorClass,
