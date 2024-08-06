@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/MonsterMasher/static/css/main.c2bc5b15.css",
-    "main.js": "/MonsterMasher/static/js/main.9f1624e9.js",
+    "main.js": "/MonsterMasher/static/js/main.7d912b84.js",
     "static/js/453.f4d3da46.chunk.js": "/MonsterMasher/static/js/453.f4d3da46.chunk.js",
     "index.html": "/MonsterMasher/index.html",
     "main.c2bc5b15.css.map": "/MonsterMasher/static/css/main.c2bc5b15.css.map",
-    "main.9f1624e9.js.map": "/MonsterMasher/static/js/main.9f1624e9.js.map",
+    "main.7d912b84.js.map": "/MonsterMasher/static/js/main.7d912b84.js.map",
     "453.f4d3da46.chunk.js.map": "/MonsterMasher/static/js/453.f4d3da46.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c2bc5b15.css",
-    "static/js/main.9f1624e9.js"
+    "static/js/main.7d912b84.js"
   ]
 }
