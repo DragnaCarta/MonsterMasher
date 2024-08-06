@@ -13,6 +13,10 @@ export const StatblockForm = ({ statblock }) => {
     setName,
     size,
     setSize,
+    type,
+    setType,
+    alignment,
+    setAlignment,
     abilityScores,
     setAbilityScores,
     armorClass,
@@ -44,6 +48,10 @@ export const StatblockForm = ({ statblock }) => {
           setName={setName}
           size={size}
           setSize={setSize}
+          type={type}
+          setType={setType}
+          alignment={alignment}
+          setAlignment={setAlignment}
         />
       </Collapsible>
 
