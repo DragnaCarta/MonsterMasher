@@ -1,9 +1,12 @@
+// src/App.js
+
 import React from 'react';
 import { StatblockForm } from './components/StatblockForm';
 import { StatblockPreview } from './components/StatblockPreview';
 import { useStatblock } from './hooks/useStatblock';
 import { generateStatblockText, downloadTextFile } from './utils/exportHelpers';
-import { Save, Download } from 'lucide-react';
+import { generateHTMLStatblock } from './utils/htmlExport';
+import { Save, Download, Code } from 'lucide-react';
 
 function App() {
   const statblock = useStatblock();
@@ -11,6 +14,11 @@ function App() {
   const handleExport = () => {
     const statblockText = generateStatblockText(statblock);
     downloadTextFile(`${statblock.name}_statblock.txt`, statblockText);
+  };
+
+  const handleHTMLExport = () => {
+    const htmlStatblock = generateHTMLStatblock(statblock);
+    downloadTextFile(`${statblock.name}_statblock.html`, htmlStatblock);
   };
 
   const handleSave = () => {
@@ -40,7 +48,10 @@ function App() {
               Load
             </button>
             <button onClick={handleExport} className="btn btn-primary flex items-center">
-              <Download className="mr-2" /> Export
+              <Download className="mr-2" /> Export Text
+            </button>
+            <button onClick={handleHTMLExport} className="btn btn-primary flex items-center">
+              <Code className="mr-2" /> Export HTML
             </button>
           </div>
         </div>
